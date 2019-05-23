@@ -11,15 +11,18 @@ alpha = 0.05
 random_min = 0.1
 dimension = 1
 theta = np.random.randn(dimension)
-w_tmp = [np.random.randn(dimension), np.random.randn(dimension)]
+#w_tmp = np.array((0,2), float)
 
-X = np.array((0,2), float)
-W = np.array((0,2), float)
-T = np.array([])
-W_log = np.array((0,2), float)
-theta_log = np.array([])
+X = np.empty((0,2), float)
+W = np.empty((0,2), float)
+# T = np.empty((0,1), int)
+T = []
+W_log = np.empty((0,2), float)
+theta_log = np.empty((0,2), float)
 
 index = 0
+
+print("input data")
 
 try:
     file = open(file_name, "r")
@@ -28,15 +31,17 @@ try:
             continue
         else:
             data = line.split()
-            x_tmp = [float(data[1]), float(data[2])]
-            t_tmp = float(data[3])
-            #print(x_tmp)
-            X = np.append(X, np.array(x_tmp), axis=0)
-            T = np.append(T, t_tmp)
-            W = np.append(W, np.array(w_tmp), axis=0)
-            #np.append(X, x_tmp)
-            #np.append(T, t_tmp)
-            #np.append(W, w_tmp)
+            x_tmp = np.array([[float(data[1]), float(data[2])]])
+            t_tmp = int(data[3])
+            w1_init = float(np.random.randn(dimension))
+            w2_init = float(np.random.randn(dimension))
+            w_tmp = np.array([[w1_init, w2_init]])
+            X = np.append(X, x_tmp, axis=0)
+            #print("X:", X)
+            T.append(t_tmp)
+            #print("T:", T)
+            W = np.append(W, w_tmp, axis=0)
+            #print("W:", W)
             print("loading now")
             index += 1
 
@@ -51,16 +56,15 @@ finally:
 
 def calc_phi(num):
     if num > 0:
-        print("1")
+        #print("1")
         return 1
     else:
-        print("0")
         return 0
 
 
 def calc_output(x1, x2, w1, w2):
     sigma_wx = x1 * w1 + x2 * w2
-    print("sigma:", sigma_wx)
+    #print("sigma:", sigma_wx)
     output = calc_phi(sigma_wx - theta)
     return output
 
@@ -79,7 +83,7 @@ if __name__ == '__main__':
         w1_tmp = W[i, 0]
         w2_tmp = W[i, 1]
         y = calc_output(x1_tmp, x2_tmp, w1_tmp, w2_tmp)
-
+        
         if y == T[i]:
             print("correct!")
             correct_count += 1
@@ -89,9 +93,9 @@ if __name__ == '__main__':
             W[i, 0] -= alpha * delta * X[i, 0]
             W[i, 1] -= alpha * delta * X[i, 1]
             theta += alpha * delta
-
-        W_log_tmp = [W[i,0], W[i,1]]
-        W_log.append(W_log, np.array(W_log_tmp), axis=0)
+        
+        W_log_tmp = np.array([[W[i,0], W[i,1]]])
+        W_log = np.append(W_log, W_log_tmp, axis=0)
         
 
         if i == index - 1:

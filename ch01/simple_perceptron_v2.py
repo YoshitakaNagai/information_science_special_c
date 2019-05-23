@@ -69,13 +69,13 @@ def calc_output(x1, x2, w1, w2):
     return output
 
 
+learn_count = 0
 
 if __name__ == '__main__':
     learned_flag = False
     correct_count = 0
     correct_answer_rate = 0
     i = 0
-    learn_count = 0
     while learned_flag == False:
         i = i % index
         x1_tmp = X[i, 0]
@@ -93,6 +93,7 @@ if __name__ == '__main__':
             W[i, 0] -= alpha * delta * X[i, 0]
             W[i, 1] -= alpha * delta * X[i, 1]
             theta += alpha * delta
+            learn_count += 1
         
         W_log_tmp = np.array([[W[i,0], W[i,1]]])
         W_log = np.append(W_log, W_log_tmp, axis=0)
@@ -101,21 +102,20 @@ if __name__ == '__main__':
         if i == index - 1:
             correct_answer_rate = correct_count / index
             correct_count = 0
-            learn_count += 1
             if correct_answer_rate == 1:
                 print("finish!!!")
                 learned_flag = True
                 print("learn count : ", learn_count)
-                #sys.exit()
             else:
-                i = i
-                # print(i)
                 print("rate : ", correct_answer_rate * 100)
             
         i += 1
         # print(i)
 
-plots = plt.plot(np.arange(learn_count), W_log[0:], label="w1")
+
+step = np.arange(learn_count)
+
+plots = plt.plot(step, W_log[:,0], label="w1")
 plt.title("simple_perceptron")
 plt.xlabel("step")
 plt.ylabel("w1")

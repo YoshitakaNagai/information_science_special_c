@@ -15,15 +15,13 @@ theta = randn_param*np.random.randn(dimension)
 
 X = np.empty((0,2), float)
 W = np.empty((0,2), float)
-# T = np.empty((0,1), int)
-T = []
 W_log = np.empty((0,2), float)
 theta_log = np.empty((0,1), float)
 accuracy_log = np.empty((0,1), float)
+accuracy_log_epoch = np.empty((0,1), float)
+T = []
 
 index = 0
-
-print("input data")
 
 try:
     file = open(file_name, "r")
@@ -53,6 +51,7 @@ finally:
     file.close()
 
 
+correct_idx = [0] * index
 
 
 def calc_phi(num):
@@ -70,16 +69,24 @@ def calc_output(x1, x2, w1, w2):
     return output
 
 
+def calc_accuracy():
+    correct_count = 0
+    for i in range(index):
+        if correct_idx[i] == 1:
+            correct_count += 1
+    return correct_count / index
+
+
 learn_count = 0
 roop = 0
 
 if __name__ == '__main__':
     learned_flag = False
-    correct_count = 0
     correct_answer_rate = 0
     i = 0
     idx = np.arange(index)
     k = 0
+    epoch = 0
     while learned_flag == False:
         k = k % index
         i = int(np.random.choice(idx, 1, replace=False))
@@ -92,7 +99,8 @@ if __name__ == '__main__':
         
         if y == T[i]:
             #print("correct!")
-            correct_count += 1
+            correct_idx[i] = 1
+
         else:
             #print("learn!")
             delta = y - T[i]
@@ -100,47 +108,49 @@ if __name__ == '__main__':
             W[i, 1] -= alpha * delta * x2_tmp
             theta += alpha * delta
             learn_count += 1
+       
+        W_log_tmp = np.array([[W[i,0], W[i,1]]])
+        W_log = np.append(W_log, W_log_tmp, axis=0)
+        theta_log = np.append(theta_log, theta)
+        accuracy_log = np.append(accuracy_log, correct_answer_rate)
+
+        correct_answer_rate = calc_accuracy()
         
-            W_log_tmp = np.array([[W[i,0], W[i,1]]])
-            W_log = np.append(W_log, W_log_tmp, axis=0)
-            theta_log = np.append(theta_log, theta)
-
+        
+        print("rate : ", correct_answer_rate * 100, "%")
+        if correct_answer_rate == 1:
+                    print("finish!!!")
+                    print("learn count : ", roop)
+                    print("epoch : ", epoch)
+                    learned_flag = True
+        
         if k == index - 1:
-            roop += 1
-            correct_answer_rate = correct_count / index
-            accuracy_log = np.append(accuracy_log, correct_answer_rate)
-            correct_count = 0
             idx = np.arange(index)
-            if correct_answer_rate == 1:
-                print("finish!!!")
-                learned_flag = True
-                print("learn_count : ", learn_count)
-                print("epoch : ", roop)
-            else:
-                print("rate : ", correct_answer_rate * 100)
             
-        # i += 1
+            correct_answer_rate = calc_accuracy()
+            accuracy_log_epoch = np.append(accuracy_log_epoch, correct_answer_rate)
+            
+            epoch += 1
+             
         k += 1
-        # print(i)
+        roop += 1
 
 
-# step = np.arange(learn_count)
-
-plot_w1 = plt.plot(np.arange(learn_count), W_log[:,0], label="w1")
+plot_w1 = plt.plot(np.arange(roop), W_log[:,0], label="w1")
 plt.title("w1")
 plt.xlabel("step")
 plt.ylabel("w1")
 plt.legend()
 plt.show()
 
-plot_w2 = plt.plot(np.arange(learn_count), W_log[:,1], label="w2")
+plot_w2 = plt.plot(np.arange(roop), W_log[:,1], label="w2")
 plt.title("w2")
 plt.xlabel("step")
 plt.ylabel("w2")
 plt.legend()
 plt.show()
 
-plot_theta = plt.plot(np.arange(learn_count), theta_log, label="theta")
+plot_theta = plt.plot(np.arange(roop), theta_log, label="theta")
 plt.title("theta")
 plt.xlabel("step")
 plt.ylabel("theta")
@@ -148,6 +158,13 @@ plt.legend()
 plt.show()
 
 plot_accuracy = plt.plot(np.arange(roop), accuracy_log, label="accuracy")
+plt.title("accuracy")
+plt.xlabel("step")
+plt.ylabel("accuracy")
+plt.legend()
+plt.show()
+
+plot_accuracy = plt.plot(np.arange(epoch), accuracy_log_epoch, label="accuracy")
 plt.title("accuracy")
 plt.xlabel("epoch")
 plt.ylabel("accuracy")

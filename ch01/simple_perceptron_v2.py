@@ -7,16 +7,21 @@ import matplotlib.pyplot as plt
 # input dataset
 file_name = "./dataset.txt"
 
-randn_param = 0.05
+randn_param = 0.001
 alpha = 0.05
 dimension = 1
 theta = randn_param*np.random.randn(dimension)
 #w_tmp = np.array((0,2), float)
 
+x1_c = np.arange(-2, 2, 0.1)
+x2_c = np.arange(-2, 2, 0.1)
+
 X = np.empty((0,2), float)
 W = np.empty((0,2), float)
 W_log = np.empty((0,2), float)
+W1W2_log = np.empty((0,1), float)
 theta_log = np.empty((0,1), float)
+thetaW2_log = np.empty((0,1), float)
 accuracy_log = np.empty((0,1), float)
 accuracy_log_epoch = np.empty((0,1), float)
 T = []
@@ -110,8 +115,11 @@ if __name__ == '__main__':
             learn_count += 1
        
         W_log_tmp = np.array([[W[i,0], W[i,1]]])
+        W1W2_log_tmp = np.array([[W[i,0]/W[i,1]]])
         W_log = np.append(W_log, W_log_tmp, axis=0)
-        theta_log = np.append(theta_log, theta)
+        W1W2_log = np.append(W1W2_log, W1W2_log_tmp, axis=0)
+        theta_log = np.append(theta_log, theta/W[i,1])
+        thetaW2_log = np.append(thetaW2_log, theta)
         accuracy_log = np.append(accuracy_log, correct_answer_rate)
 
         correct_answer_rate = calc_accuracy()
@@ -119,17 +127,49 @@ if __name__ == '__main__':
         
         print("rate : ", correct_answer_rate * 100, "%")
         if correct_answer_rate == 1:
-                    print("finish!!!")
-                    print("learn count : ", roop)
-                    print("epoch : ", epoch)
-                    learned_flag = True
-        
+            print("finish!!!")
+            print("learn count : ", roop)
+            print("epoch : ", epoch)
+            learned_flag = True
+            if W[i,1] != 0:
+                x2_c = theta/W[i,1] - W[i,0] * x1_c / W[i,1]
+                plot_borderline = plt.plot(x1_c, x2_c, label="classification_line")
+                #plot_dataset = plt.scatter(X[:,0], X[:,1], label="dataset")
+                for j in range(index):
+                    if T[j] == 0:
+                        plot_dataset = plt.scatter(X[j,0], X[j,1], c="red")
+                    else:
+                        plot_dataset = plt.scatter(X[j,0], X[j,1], c="blue")
+                plt.title("final_classification_line")
+                plt.xlabel("x1")
+                plt.ylabel("x2")
+                plt.legend()
+                plt.xlim(-1.0, 2.0)
+                plt.ylim(-1.0, 2.0)
+                plt.show()
+ 
         if k == index - 1:
             idx = np.arange(index)
             
             correct_answer_rate = calc_accuracy()
             accuracy_log_epoch = np.append(accuracy_log_epoch, correct_answer_rate)
             
+            if W[i,1] != 0:
+                x2_c = theta/W[i,1] - W[i,0] * x1_c / W[i,1]
+                plot_borderline = plt.plot(x1_c, x2_c, label="classification_line")
+                for j in range(index):
+                    if T[j] == 0:
+                        plot_dataset = plt.scatter(X[j,0], X[j,1], c="red")
+                    else:
+                        plot_dataset = plt.scatter(X[j,0], X[j,1], c="blue")
+                plt.title("classification_line")
+                plt.xlabel("x1")
+                plt.ylabel("x2")
+                plt.legend()
+                plt.xlim(-1.0, 2.0)
+                plt.ylim(-1.0, 2.0)
+                plt.show()
+
             epoch += 1
              
         k += 1
@@ -157,6 +197,20 @@ plt.ylabel("theta")
 plt.legend()
 plt.show()
 
+plot_theta = plt.plot(np.arange(roop), W1W2_log, label="w1/w2")
+plt.title("w1/w2")
+plt.xlabel("step")
+plt.ylabel("w1/w2")
+plt.legend()
+plt.show()
+
+plot_theta = plt.plot(np.arange(roop), thetaW2_log, label="theta/w2")
+plt.title("theta/w2")
+plt.xlabel("step")
+plt.ylabel("theta/w2")
+plt.legend()
+plt.show()
+
 plot_accuracy = plt.plot(np.arange(roop), accuracy_log, label="accuracy")
 plt.title("accuracy")
 plt.xlabel("step")
@@ -171,5 +225,3 @@ plt.ylabel("accuracy")
 plt.legend()
 plt.show()
 
-#x = np.arange(-0.5, 2, 0.1)
-#y = 

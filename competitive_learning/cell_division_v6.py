@@ -7,7 +7,7 @@ from pyclustering.cluster import xmeans
 # input dataset
 file_name = "./dataset.txt"
 
-
+"""
 # params1
 attenuation_rate = 0.9
 randn_param = 0.1
@@ -16,17 +16,17 @@ D_threshold = 0.01
 dimension = 2
 alpha = 0.1
 roop1_threshold = 100
-
 """
+
 #params2
 attenuation_rate = 0.9
 randn_param = 0.1
 move_end_threshold = 0.01
 D_threshold = 0.01
 dimension = 2
-alpha = 0.05
+alpha = 0.01
 roop1_threshold = 100
-"""
+
 
 
 

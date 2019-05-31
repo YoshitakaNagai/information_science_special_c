@@ -11,6 +11,7 @@ index = 0
 attenuation_rate = 0.9
 randn_param = 0.001
 alpha = 0.05
+D_threshold = 0.001
 dimension = 1
 x1_c = np.arange(-2, 2, 0.1)
 x2_c = np.arange(-2, 2, 0.1)
@@ -19,10 +20,20 @@ x2_c = np.arange(-2, 2, 0.1)
 X = np.empty((0,2), float)
 C_tmp = np.empty((0,2), float)
 Cell = np.empty((0,2), float)
-Cell_log = np.empty((0, np.empty(0, 2, float)), float)
-D = np.empty((0,1), float)
-D_log = np.empty((0, np.empty(0, 1, float)), float)
-D_threshold = 0.001
+Cell_log = np.empty((0, 2), float)
+#D = np.empty((0,1), float)
+D = []
+D_log = np.empty((0, 1), float)
+
+class Cell:
+    def __init__(self, dimention, weight_init_std, alpha):#, init_xy):
+        self.d = dimention
+        self.weight_init_std = weight_init_std
+        self.alpha = alpha
+        self.w_log = []
+        self.weight = self.weight_init_std * np.random.randn(self.d)# + init_xy
+
+
 
 try:
     file = open(file_name, "r")
@@ -69,11 +80,11 @@ if __name__ == '__main__':
     cell_num = 0
     flag_D_count = [0 for i in range(cell_num)]
     while learned_flag == False:
-        c1 = random.uniform(-1.0, 1.0)
-        c2 = random.uniform(-1.0, 1.0)
+        c1 = float(random.uniform(-1.0, 1.0))
+        c2 = float(random.uniform(-1.0, 1.0))
         C_tmp = np.array([[c1, c2]])
         Cell = np.append(Cell, C_tmp, axis=0)        
-        D = np.append(D, 0)
+        D.append(D, 0)
         cell_num += 1
         flag_C_count = [0 for i in range(cell_num)]
         for I in D: #initialize

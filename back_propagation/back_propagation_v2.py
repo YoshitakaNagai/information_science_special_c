@@ -5,10 +5,10 @@ import matplotlib.pyplot as plt
 from operator import xor
 
 #initial parameter
-randn_param = 0.01
+randn_param = 1
 dimension = 2
 alpha = 0.01
-eps = 0.001
+eps = 0.01
 
 
 
@@ -64,8 +64,8 @@ def sigmoid_derivative(x):
     return sigmoid_derivative
 
 
-def calc_output(X, W, theta):
-    sigma_WX = float(X @ W)
+def calc_output(Ta, Tb, W, theta):
+    sigma_WX = Ta * W[0] + Tb * W[1]
     s = sigma_WX - float(theta)
     output = sigmoid_func(s)
     return output, s
@@ -117,15 +117,15 @@ if __name__ == '__main__':
         #forward
         idx_a_rdm = int(np.random.choice(index, 1, replace=False))
         idx_b_rdm = int(np.random.choice(index, 1, replace=False))
-        ya, s_ij_a= calc_output(Input.X[idx_a_rdm], Param_ij[0].W, Param_ij[0].theta)
-        yb, s_ij_b= calc_output(Input.X[idx_b_rdm], Param_ij[1].W, Param_ij[1].theta)
-        z, s_jk = calc_output(np.array([ya, yb]), Param_jk.W, Param_jk.theta)
+        ya, s_ij_a= calc_output(Input.T[idx_a_rdm], Input.T[idx_b_rdm], Param_ij[0].W, Param_ij[0].theta)
+        yb, s_ij_b= calc_output(Input.T[idx_a_rdm], Input.T[idx_b_rdm], Param_ij[1].W, Param_ij[1].theta)
+        z, s_jk = calc_output(ya, yb, Param_jk.W, Param_jk.theta)
         print("z =", z)
         delta_fw = z - xor(int(Input.T[idx_a_rdm]), int(Input.T[idx_b_rdm]))
         E_fw = delta_fw**2
         print("Eroor = ", E_fw)
         #backward ... 誤差は(1 + 2)個?
-        delta_bw_jk = Param_jk.W[0] * delta_fw + Param_jk.W[1] * delta_fw
+        delta_bw_jk = (Param_jk.W[0] + Param_jk.W[1]) * delta_fw
         delta_bw_ij_a = Param_ij[0].W[0] * delta_bw_jk + Param_ij[0].W[1] * delta_fw
         delta_bw_ij_b = Param_ij[1].W[0] * delta_bw_jk + Param_ij[1].W[1] * delta_fw
         
@@ -136,42 +136,33 @@ if __name__ == '__main__':
         #learn W
         delta_W_jk_a = -2 *alpha * delta_bw_jk * sigmoid_derivative(s_jk) * ya
         delta_W_jk_b = -2 *alpha * delta_bw_jk * sigmoid_derivative(s_jk) * yb
-        Param_jk.W[0] -= delta_W_jk_a
-        #Param_jk.W[0] += delta_W_jk_a
-        Param_jk.W[1] -= delta_W_jk_b
-        #Param_jk.W[1] += delta_W_jk_b
+        Param_jk.W[0] += delta_W_jk_a
+        Param_jk.W[1] += delta_W_jk_b
         Param_jk.W_log = np.append(Param_jk.W_log, np.array([Param_jk.W]), axis=0)
 
         delta_W_ij_aa = -2 *alpha * delta_bw_ij_a * sigmoid_derivative(s_ij_a) * Input.X[idx_a_rdm][0]
         delta_W_ij_ab = -2 *alpha * delta_bw_ij_a * sigmoid_derivative(s_ij_a) * Input.X[idx_a_rdm][1]
-        Param_ij[0].W[0] -= delta_W_ij_aa
-        #Param_ij[0].W[0] += delta_W_ij_aa
-        Param_ij[0].W[1] -= delta_W_ij_aa
-        #Param_ij[0].W[1] += delta_W_ij_ab
+        Param_ij[0].W[0] += delta_W_ij_aa
+        Param_ij[0].W[1] += delta_W_ij_ab
         Param_ij[0].W_log = np.append(Param_ij[0].W_log, np.array([Param_ij[0].W]), axis=0)
         
         delta_W_ij_ba = -2 *alpha * delta_bw_ij_b * sigmoid_derivative(s_ij_b) * Input.X[idx_b_rdm][0]
         delta_W_ij_bb = -2 *alpha * delta_bw_ij_b * sigmoid_derivative(s_ij_b) * Input.X[idx_b_rdm][1]
-        Param_ij[1].W[0] -= delta_W_ij_ba
-        #Param_ij[1].W[0] += delta_W_ij_ba
-        Param_ij[1].W[1] -= delta_W_ij_bb
-        #Param_ij[1].W[1] += delta_W_ij_bb
+        Param_ij[1].W[0] += delta_W_ij_ba
+        Param_ij[1].W[1] += delta_W_ij_bb
         Param_ij[1].W_log = np.append(Param_ij[1].W_log, np.array([Param_ij[1].W]), axis=0)
 
         #learn theta
         delta_theta_jk = 2 * alpha * delta_bw_jk * sigmoid_derivative(s_jk)
         Param_jk.theta += delta_theta_jk
-        #Param_jk.theta -= delta_theta_jk
         Param_jk.theta_log = np.append(Param_jk.theta_log, np.array([Param_jk.theta]), axis=0)
 
         delta_theta_ij_a = 2 * alpha * delta_bw_ij_a * sigmoid_derivative(s_ij_a)
         Param_ij[0].theta += delta_theta_ij_a
-        #Param_ij[0].theta -= delta_theta_ij_a
         Param_ij[0].theta_log = np.append(Param_ij[0].theta_log, np.array([Param_ij[0].theta]), axis=0)
         
         delta_theta_ij_b = 2 * alpha * delta_bw_ij_b * sigmoid_derivative(s_ij_b)
         Param_ij[1].theta += delta_theta_ij_b
-        #Param_ij[1].theta -= delta_theta_ij_b
         Param_ij[1].theta_log = np.append(Param_ij[1].theta_log, np.array([Param_ij[1].theta]), axis=0)
 
         if E_fw < eps:
@@ -225,8 +216,8 @@ if __name__ == '__main__':
             plt.title("line")
             plt.xlabel("x1")
             plt.ylabel("x2")
-            plt.xlim(-1.5, 2.0)
-            plt.ylim(-1.5, 2.0)
+            plt.xlim(-10.0, 10.0)
+            plt.ylim(-10.0, 10.0)
             plt.pause(0.00000000000000000001)
 
         if epoch == 1000:

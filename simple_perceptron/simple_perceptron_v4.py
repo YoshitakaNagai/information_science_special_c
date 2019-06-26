@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 # input dataset
 file_name = "./dataset.txt"
 
-randn_param = 0.1
+randn_param = 1
 alpha = 0.05
 dimension = 0.1
 theta = randn_param*np.random.randn(dimension)
@@ -64,7 +64,8 @@ def calc_phi(num):
 
 def calc_output(x1, x2, w1, w2):
     sigma_wx = x1 * w1 + x2 * w2
-    output = calc_phi(sigma_wx - theta)
+    #output = calc_phi(sigma_wx - theta)
+    output = calc_phi(sigma_wx + theta)
     return output
 
 
